@@ -1,0 +1,17 @@
+{
+  "name": "cs-ai-sheetslogger",
+  "version": "1.0.0",
+  "description": "Use google sheets as a log\r Testing first commit",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "google-auth-library": "^9.4.2",
+    "google-spreadsheet": "^4.1.1",
+    "node-fetch": "^3.3.2"
+  }
+}
