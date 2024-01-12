@@ -90,7 +90,10 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
 export const handler = async (event, context) => {
 
-    console.log('*********** LOADING ***********')
+    console.log('*********** LOADING V1.0 ***********')
+    console.log(event)
+    console.log('************************************')
+
     let eventObject = JSON.parse(event.body);
 
     // UNIVERSAL VALIDATOR OF METHOD
