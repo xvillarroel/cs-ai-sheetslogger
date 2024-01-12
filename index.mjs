@@ -92,6 +92,21 @@ export const handler = async (event, context) => {
 
     console.log('*********** LOADING ***********')
     let eventObject = JSON.parse(event.body);
+
+    // UNIVERSAL VALIDATOR OF METHOD
+    if (eventObject.requestContext.http.method !== 'POST') {
+        let res = {
+            statusCode: 400,
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            body: "Method is not allowed."
+        }
+        console.log(JSON.stringify(res, null, 2))
+        return res;
+    }
+    // UNIVERSAL VALIDATOR OF METHOD
+
     let sheetid = eventObject.sheetid;
     let tabName = (!eventObject.tab) ? getCurrentDate(true) : eventObject.tab; //get the the DD/MM/YYYY
     let message = eventObject.message;
@@ -129,7 +144,12 @@ export const handler = async (event, context) => {
 //         await handler({
 //         body: JSON.stringify({
 //             "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4", 
-//             "message": "This is another test"
+//             "message": "This is another test",
+//             "requestContext": {
+//                 "http": {
+//                     "method": "POST"
+//                 }
+//             }
 //         }, null, 2)
 //     })
 //     //));
@@ -140,3 +160,5 @@ export const handler = async (event, context) => {
 //     "tab": "01/11/2024",
 //     "message": "This is a test"
 // }
+
+//https://ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws/
