@@ -94,6 +94,7 @@ export const handler = async (event, context) => {
 
     console.log('*********** LOADING V1.1 ***********')
     console.log(eventObject)
+    console.log(`Type: ${typeof eventObject}`)
     console.log('*************************************')
 
     // UNIVERSAL VALIDATOR OF METHOD
@@ -199,5 +200,6 @@ export const handler = async (event, context) => {
 // }
 
 //https://ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws/
+
 
 
