@@ -90,15 +90,16 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
 export const handler = async (event, context) => {
 
-    let eventObject = JSON.parse(event.body);
-
     console.log('*********** LOADING V1.1 ***********')
-    console.log(eventObject)
-    console.log(`Type: ${typeof eventObject}`)
+    console.log(event);
+    console.log(`Type: ${typeof event}`);
     console.log('*************************************')
 
+    let eventBody = JSON.parse(event.body);
+    // console.log(`Type: ${typeof eventBody}`)
+
     // UNIVERSAL VALIDATOR OF METHOD
-    if (eventObject.requestContext.http.method !== 'POST') {
+    if (event.requestContext.http.method !== 'POST') {
         let res = {
             statusCode: 400,
             headers: {
@@ -111,9 +112,9 @@ export const handler = async (event, context) => {
     }
     // UNIVERSAL VALIDATOR OF METHOD
 
-    let sheetid = JSON.parse(eventObject.body).sheetid;
-    let tabName = (!JSON.parse(eventObject.body).tab) ? getCurrentDate(true) : JSON.parse(eventObject.body).tab; //get the the DD/MM/YYYY
-    let message = JSON.parse(eventObject.body).message;
+    let sheetid = eventBody.sheetid;
+    let tabName = (!eventBody.tab) ? getCurrentDate(true) : eventBody.tab; //get the the DD/MM/YYYY
+    let message = eventBody.message;
     let timeframe = getCurrentDate(false) // get the full timeframe, not only the DD/MM/YYYY
 
     const doc = new GoogleSpreadsheet(sheetid, globals.SERVICEACCOUNTAUTH);
@@ -146,52 +147,59 @@ export const handler = async (event, context) => {
 // (async () => {
 //     //console.log(JSON.stringify(
 //         await handler({
-//         body: JSON.stringify({
-//                                 version: '2.0',
-//                                 routeKey: '$default',
-//                                 rawPath: '/',
-//                                 rawQueryString: '',
-//                                 headers: {
-//                                 'content-length': '107',
-//                                 'x-amzn-tls-version': 'TLSv1.2',
-//                                 'x-forwarded-proto': 'https',
-//                                 'postman-token': 'cd2f5956-44b3-4298-88e9-d10dfba4bc74',
-//                                 'x-forwarded-port': '443',
-//                                 'x-forwarded-for': '181.43.127.230',
-//                                 accept: '*/*',
-//                                 'x-amzn-tls-cipher-suite': 'ECDHE-RSA-AES128-GCM-SHA256',
-//                                 'x-amzn-trace-id': 'Root=1-65a09bf8-79d301b26d42233e44bb8237',
-//                                 host: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
-//                                 'content-type': 'application/json',
-//                                 'accept-encoding': 'gzip, deflate, br',
-//                                 'user-agent': 'PostmanRuntime/7.36.0'
-//                                 },
-//                                 requestContext: {
-//                                 accountId: 'anonymous',
-//                                 apiId: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
-//                                 domainName: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
-//                                 domainPrefix: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
-//                                 http: {
-//                                     method: 'GET',
-//                                     path: '/',
-//                                     protocol: 'HTTP/1.1',
-//                                     sourceIp: '181.43.127.230',
-//                                     userAgent: 'PostmanRuntime/7.36.0'
-//                                 },
-//                                 requestId: '9c8c29ec-37aa-4d1e-bc32-fcd3abf82fdf',
-//                                 routeKey: '$default',
-//                                 stage: '$default',
-//                                 time: '12/Jan/2024:01:55:04 +0000',
-//                                 timeEpoch: 1705024504027
-//                                 },
-//                                 body: '{\r\n' +
-//                                 '    "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4",\r\n' +
-//                                 '    "message": "This is another test"\r\n' +
-//                                 '}',
-//                                 isBase64Encoded: false
-//                             }, null, 2)
+//                         version: '2.0',
+//                         routeKey: '$default',
+//                         rawPath: '/',
+//                         rawQueryString: '',
+//                         headers: {
+//                         'content-length': '107',
+//                         'x-amzn-tls-version': 'TLSv1.2',
+//                         'x-forwarded-proto': 'https',
+//                         'postman-token': 'cd2f5956-44b3-4298-88e9-d10dfba4bc74',
+//                         'x-forwarded-port': '443',
+//                         'x-forwarded-for': '181.43.127.230',
+//                         accept: '*/*',
+//                         'x-amzn-tls-cipher-suite': 'ECDHE-RSA-AES128-GCM-SHA256',
+//                         'x-amzn-trace-id': 'Root=1-65a09bf8-79d301b26d42233e44bb8237',
+//                         host: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
+//                         'content-type': 'application/json',
+//                         'accept-encoding': 'gzip, deflate, br',
+//                         'user-agent': 'PostmanRuntime/7.36.0'
+//                         },
+//                         requestContext: {
+//                         accountId: 'anonymous',
+//                         apiId: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
+//                         domainName: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
+//                         domainPrefix: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
+//                         http: {
+//                             method: 'GET',
+//                             path: '/',
+//                             protocol: 'HTTP/1.1',
+//                             sourceIp: '181.43.127.230',
+//                             userAgent: 'PostmanRuntime/7.36.0'
+//                         },
+//                         requestId: '9c8c29ec-37aa-4d1e-bc32-fcd3abf82fdf',
+//                         routeKey: '$default',
+//                         stage: '$default',
+//                         time: '12/Jan/2024:01:55:04 +0000',
+//                         timeEpoch: 1705024504027
+//                         },
+//                         body: '{\r\n' +
+//                         '    "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4",\r\n' +
+//                         '    "message": "This is another test"\r\n' +
+//                         '}',
+//                         isBase64Encoded: false
 //                         })
 // })() 
+
+
+
+
+
+
+
+
+
 
 // {
 //     "sheetid": "",
