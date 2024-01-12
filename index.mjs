@@ -90,7 +90,7 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
 export const handler = async (event, context) => {
 
-    console.log('*********** LOADING V1.1 ***********')
+    console.log('*********** LOADING V1.2 ***********')
     console.log(event);
     console.log(`Type: ${typeof event}`);
     console.log('*************************************')
@@ -139,8 +139,17 @@ export const handler = async (event, context) => {
 
     //Write the log to sheet
     await writeToSheet(activeSheet, messageArray, rowIndex);
-    console.log(`Message written in row ${rowIndex}`);
-    return ;
+    
+    let res = {
+        statusCode: 200,
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: `Message written in row ${rowIndex}`
+    }
+    
+    console.log(JSON.stringify(res, null, 2))
+    return res;
 
 };
 
