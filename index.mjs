@@ -124,16 +124,16 @@ export const handler = async (event, context) => {
 
 };
 
-(async () => {
-    //console.log(JSON.stringify(
-        await handler({
-        body: JSON.stringify({
-            "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4", 
-            "message": "This is another test"
-        }, null, 2)
-    })
-    //));
-})() 
+// (async () => {
+//     //console.log(JSON.stringify(
+//         await handler({
+//         body: JSON.stringify({
+//             "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4", 
+//             "message": "This is another test"
+//         }, null, 2)
+//     })
+//     //));
+// })() 
 
 // {
 //     "sheetid": "",
