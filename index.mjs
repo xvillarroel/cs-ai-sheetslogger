@@ -16,18 +16,23 @@ const createNewSheet = async (doc, tabName) => {
 
     try {
         let activeSheet = await doc.addSheet({ title: tabName });
-        await activeSheet.loadCells('A1:Z');
+        await activeSheet.loadCells('A1:C');
 
-        const B2 = activeSheet.getCellByA1('B2');
-        const C2 = activeSheet.getCellByA1('C2');
+        const A2 = activeSheet.getCellByA1('A1');
+        const B2 = activeSheet.getCellByA1('B1');
+        const C2 = activeSheet.getCellByA1('C1');
+
+        A2.value = 'Index';
+        A2.textFormat = { bold: true }; 
 
         B2.value = 'Timeframe';
-        B2.textFormat = { bold: true }; //B2.textFormat = { bold: true, foregroundColor: 'red' };
+        B2.textFormat = { bold: true }; //B1.textFormat = { bold: true, foregroundColor: 'red' };
 
         C2.value = 'Message'; 
         C2.textFormat = { bold: true };
 
         await activeSheet.saveUpdatedCells();
+
     } catch (error) {
         console.error("Error creating tab:", error);
         // Handle the error appropriately
@@ -35,17 +40,16 @@ const createNewSheet = async (doc, tabName) => {
 }
 
 const getCurrentDate = (yearonly) => {
-
-    let res;
     var today = new Date();
-    var dd = String(today.getDate()).padStart(2, '0');
-    var mm = String(today.getMonth() + 1).padStart(2, '0'); // Enero es 0
-    var yyyy = today.getFullYear();
 
-    (yearonly) ? res = `${mm}/${dd}/${yyyy}` : res = today.toString();
+    var dd = String(today.getUTCDate()).padStart(2, '0');
+    var mm = String(today.getUTCMonth() + 1).padStart(2, '0'); // Enero es 0
+    var yyyy = today.getUTCFullYear();
+    var hours = String(today.getUTCHours()).padStart(2, '0');
+    var minutes = String(today.getUTCMinutes()).padStart(2, '0');
+    var seconds = String(today.getUTCSeconds()).padStart(2, '0');
 
-    return res;
-    
+    return (yearonly) ? `${mm}/${dd}/${yyyy}` : `${mm}/${dd}/${yyyy} ${hours}:${minutes}:${seconds}`;
 };
 
 const getRowIndex = async (activeSheet) => {
@@ -55,114 +59,67 @@ const getRowIndex = async (activeSheet) => {
     // return matrix.findIndex(item => (item[1] === array[1]) && (item[2] === array[2]) && (item[3] === array[3]) && (item[4] === array[4]) && (item[5] === array[5]) );
 }
 
-const writeToSheet = async (knowledgebase_url, dataMatrix, doc, tabName, textOnly = false) => {
+const writeToSheet = async (activeSheet, messageArray, index) => {
 
-    let rowOffset = 3;
     console.log('Starting the Dump job');
 
     try {
 
-        const activeSheet = await doc.sheetsByTitle[tabName]
-        // const range = `B1:C${dataMatrix.length + 2}`;
-        const range = `B1:H`;
-        await activeSheet.loadCells(range);
-
+        await activeSheet.loadCells('A1:C');
+                
         let cell;
-        let newBody;
 
-            for (let i = 0; i < dataMatrix.length; i++) {
+        cell = activeSheet.getCellByA1(`A${index}`); //A Column
+            // if (index === 2) { cell.formula = `=0`; } else { cell.formula = `=A${index-1}+1`; }
+            cell.formula = (index === 2) ? `=0` : `=A${index-1}+1`;
 
-                let rowIndex = i + rowOffset; 
+        cell = activeSheet.getCellByA1(`B${index}`); //B Column
+            cell.value = messageArray[0];
+        
+        cell = activeSheet.getCellByA1(`C${index}`); //C Column
+            cell.value = messageArray[1];
 
-                cell = activeSheet.getCellByA1(`B${rowIndex}`); //B Column
-                cell.value = (i + 1);
-
-                cell = activeSheet.getCellByA1(`C${rowIndex}`); //C Column
-                cell.value = dataMatrix[i][0];
-                
-                cell = activeSheet.getCellByA1(`D${rowIndex}`); //D Column
-                cell.value = `=HYPERLINK("${knowledgebase_url}hc/en-us/articles/${dataMatrix[i][0]}","${dataMatrix[i][1]}")` ;
-
-                cell = activeSheet.getCellByA1(`E${rowIndex}`); //E Column
-                textOnly ? newBody = htmlToText(dataMatrix[i][2], { wordwrap: 130 }) : newBody = dataMatrix[i][2];
-                newBody = (newBody.length > 49999) ? newBody.substring(0, 49999) : newBody;
-                cell.value = newBody;
-
-                cell = activeSheet.getCellByA1(`F${rowIndex}`); //F Column
-                cell.value = (!dataMatrix[i][3]) ? 'Null' : dataMatrix[i][3] ;
-
-                // cell = activeSheet.getCellByA1(`F${rowIndex}`); //G Column
-                // cell.value = `=HYPERLINK("${knowledgebase_url}hc/en-us/articles/${dataMatrix[i][0]}","${dataMatrix[i][0]}")` ;
-
-                // console.log(`Iteration # ${i}`);
-                
-            }
-
-        console.log('Dump finished');
         await activeSheet.saveUpdatedCells();
+        console.log('Dump finished');
 
     } catch (error) {
-        console.error(error.toString());
+        console.error(`ERROR: ${error.toString()}`);
     }
+
 };
-
-// const updateVisibility = async (counter, allIds) => { //el comienza aqui: 14935311826578 
-
-//     let internalCounter = 0;
-//     for (const articleId of allIds) {
-//         let callURL = `https://answerhub.support.ignitetech.com/api/v2/help_center/en-us/articles/${articleId}`;
-//         try {
-//             const response = await fetch(callURL, {
-//                 headers: {
-//                     'Authorization': globals.ZDAUTH,
-//                     'Content-Type': 'application/json'
-//                 },
-//                 method: 'PUT',
-//                 body: JSON.stringify({ article: { user_segment_id: 360000807280 } })
-//             });
-
-//             if (!response.ok) {
-//                 console.log(callURL)
-//                 throw new Error(`Error updating article ${articleId}: ${response.statusText}`);
-//             }
-
-//             console.log(`${counter}${String(internalCounter).padStart(2, '0')} - Article ${articleId} updated`);
-//             internalCounter++;
-//         } catch (error) {
-//             console.error(error);
-//         }
-//     }
-
-// };
 
 export const handler = async (event, context) => {
 
     console.log('*********** LOADING ***********')
     let eventObject = JSON.parse(event.body);
     let sheetid = eventObject.sheetid;
-    let tabName = (!eventObject.tabName) ? tabName = getCurrentDate(true) : eventObject.tabName; //get the the DD/MM/YYYY
+    let tabName = (!eventObject.tab) ? getCurrentDate(true) : eventObject.tab; //get the the DD/MM/YYYY
     let message = eventObject.message;
-
     let timeframe = getCurrentDate(false) // get the full timeframe, not only the DD/MM/YYYY
 
-    // const doc = new GoogleSpreadsheet(sheetid, globals.SERVICEACCOUNTAUTH);
     const doc = new GoogleSpreadsheet(sheetid, globals.SERVICEACCOUNTAUTH);
-
     await doc.loadInfo();
     console.log(`Title of the doc: ${doc.title}`);
 
     let activeSheet = doc.sheetsByTitle[tabName];
+    let recentlyCreated = false;
 
     if (!activeSheet){
         await createNewSheet(doc, tabName);
         console.log('Sheet created')
+        recentlyCreated = true; //this means that the new sheet was recently created
+        activeSheet = doc.sheetsByTitle[tabName];
     }
 
-    // get the next row to write
-    const rowIndex = await getRowIndex(activeSheet) + globals.ROWOFFSET + 1;
+    // Get the next row to write
+    const rowIndex = (recentlyCreated) ? 2 : (await getRowIndex(activeSheet)) + globals.ROWOFFSET + 1;
 
-    console.log(`Row to write: ${rowIndex}`);
+    //Calculate Message Array
+    let messageArray = [timeframe, message]
 
+    //Write the log to sheet
+    await writeToSheet(activeSheet, messageArray, rowIndex);
+    console.log(`Message written in row ${rowIndex}`);
     return ;
 
 };
@@ -171,14 +128,15 @@ export const handler = async (event, context) => {
     //console.log(JSON.stringify(
         await handler({
         body: JSON.stringify({
-            "sheetid": "14DLQIz0uL2mq_KHitEtyCJal4cU95mX6icIo_pxXuiE",
-            "tabName": "01/11/2024",
-            "message": "This is a test"
+            "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4", 
+            "message": "This is another test"
         }, null, 2)
     })
     //));
 })() 
 
-//https://answerhub.support.ignitetech.com/
-
-//https://support.jigsawinteractive.com/
+// {
+//     "sheetid": "",
+//     "tab": "01/11/2024",
+//     "message": "This is a test"
+// }
