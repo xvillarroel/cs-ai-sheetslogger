@@ -52,16 +52,9 @@ const getCurrentDate = (yearonly) => {
     return (yearonly) ? `${mm}/${dd}/${yyyy}` : `${mm}/${dd}/${yyyy} ${hours}:${minutes}:${seconds}`;
 };
 
-const getRowIndex = async (activeSheet) => {
-    await activeSheet.loadCells('B2:B');
-    let rows = await activeSheet.getRows();
-    return rows.length
-    // return matrix.findIndex(item => (item[1] === array[1]) && (item[2] === array[2]) && (item[3] === array[3]) && (item[4] === array[4]) && (item[5] === array[5]) );
-}
-
 const writeToSheet = async (activeSheet, messageArray, index) => {
 
-    console.log('Starting the Dump job');
+    //console.log('Starting the Dump job');
 
     try {
 
@@ -80,7 +73,7 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
             cell.value = messageArray[1];
 
         await activeSheet.saveUpdatedCells();
-        console.log('Dump finished');
+        //console.log('Dump finished');
 
     } catch (error) {
         console.error(`ERROR: ${error.toString()}`);
@@ -90,13 +83,13 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
 export const handler = async (event, context) => {
 
-    console.log('*********** LOADING V1.2 ***********')
-    console.log(event);
-    console.log(`Type: ${typeof event}`);
-    console.log('*************************************')
+    //console.log('*********** LOADING V1.2 ***********')
+    //console.log(event);
+    //console.log(`Type: ${typeof event}`);
+    //console.log('*************************************')
 
     let eventBody = JSON.parse(event.body);
-    // console.log(`Type: ${typeof eventBody}`)
+    ////console.log(`Type: ${typeof eventBody}`)
 
     // UNIVERSAL VALIDATOR OF METHOD
     if (event.requestContext.http.method !== 'POST') {
@@ -107,7 +100,7 @@ export const handler = async (event, context) => {
             },
             body: "Method is not allowed."
         }
-        console.log(JSON.stringify(res, null, 2))
+        //console.log(JSON.stringify(res, null, 2))
         return res;
     }
     // UNIVERSAL VALIDATOR OF METHOD
@@ -119,20 +112,26 @@ export const handler = async (event, context) => {
 
     const doc = new GoogleSpreadsheet(sheetid, globals.SERVICEACCOUNTAUTH);
     await doc.loadInfo();
-    console.log(`Title of the doc: ${doc.title}`);
+    //console.log(`Title of the doc: ${doc.title}`);
 
     let activeSheet = doc.sheetsByTitle[tabName];
     let recentlyCreated = false;
 
     if (!activeSheet){
         await createNewSheet(doc, tabName);
-        console.log('Sheet created')
+        //console.log('Sheet created')
         recentlyCreated = true; //this means that the new sheet was recently created
         activeSheet = doc.sheetsByTitle[tabName];
     }
 
     // Get the next row to write
-    const rowIndex = (recentlyCreated) ? 2 : (await getRowIndex(activeSheet)) + globals.ROWOFFSET + 1;
+    let rowIndex;
+    if (recentlyCreated) { 
+        rowIndex =2;
+    } else {
+        //await activeSheet.loadCells('B2:B');
+        rowIndex = (await activeSheet.getRows()).length + globals.ROWOFFSET + 1;
+    }
 
     //Calculate Message Array
     let messageArray = [timeframe, message]
@@ -148,58 +147,58 @@ export const handler = async (event, context) => {
         body: `Message written in row ${rowIndex}`
     }
     
-    console.log(JSON.stringify(res, null, 2))
+    //console.log(JSON.stringify(res, null, 2))
     return res;
 
 };
 
-// (async () => {
-//     //console.log(JSON.stringify(
-//         await handler({
-//                         version: '2.0',
-//                         routeKey: '$default',
-//                         rawPath: '/',
-//                         rawQueryString: '',
-//                         headers: {
-//                         'content-length': '107',
-//                         'x-amzn-tls-version': 'TLSv1.2',
-//                         'x-forwarded-proto': 'https',
-//                         'postman-token': 'cd2f5956-44b3-4298-88e9-d10dfba4bc74',
-//                         'x-forwarded-port': '443',
-//                         'x-forwarded-for': '181.43.127.230',
-//                         accept: '*/*',
-//                         'x-amzn-tls-cipher-suite': 'ECDHE-RSA-AES128-GCM-SHA256',
-//                         'x-amzn-trace-id': 'Root=1-65a09bf8-79d301b26d42233e44bb8237',
-//                         host: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
-//                         'content-type': 'application/json',
-//                         'accept-encoding': 'gzip, deflate, br',
-//                         'user-agent': 'PostmanRuntime/7.36.0'
-//                         },
-//                         requestContext: {
-//                         accountId: 'anonymous',
-//                         apiId: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
-//                         domainName: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
-//                         domainPrefix: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
-//                         http: {
-//                             method: 'GET',
-//                             path: '/',
-//                             protocol: 'HTTP/1.1',
-//                             sourceIp: '181.43.127.230',
-//                             userAgent: 'PostmanRuntime/7.36.0'
-//                         },
-//                         requestId: '9c8c29ec-37aa-4d1e-bc32-fcd3abf82fdf',
-//                         routeKey: '$default',
-//                         stage: '$default',
-//                         time: '12/Jan/2024:01:55:04 +0000',
-//                         timeEpoch: 1705024504027
-//                         },
-//                         body: '{\r\n' +
-//                         '    "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4",\r\n' +
-//                         '    "message": "This is another test"\r\n' +
-//                         '}',
-//                         isBase64Encoded: false
-//                         })
-// })() 
+(async () => {
+    ////console.log(JSON.stringify(
+        await handler({
+                        version: '2.0',
+                        routeKey: '$default',
+                        rawPath: '/',
+                        rawQueryString: '',
+                        headers: {
+                        'content-length': '107',
+                        'x-amzn-tls-version': 'TLSv1.2',
+                        'x-forwarded-proto': 'https',
+                        'postman-token': 'cd2f5956-44b3-4298-88e9-d10dfba4bc74',
+                        'x-forwarded-port': '443',
+                        'x-forwarded-for': '181.43.127.230',
+                        accept: '*/*',
+                        'x-amzn-tls-cipher-suite': 'ECDHE-RSA-AES128-GCM-SHA256',
+                        'x-amzn-trace-id': 'Root=1-65a09bf8-79d301b26d42233e44bb8237',
+                        host: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
+                        'content-type': 'application/json',
+                        'accept-encoding': 'gzip, deflate, br',
+                        'user-agent': 'PostmanRuntime/7.36.0'
+                        },
+                        requestContext: {
+                        accountId: 'anonymous',
+                        apiId: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
+                        domainName: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws',
+                        domainPrefix: 'ytzivrzj76ejwc2vdbnzwladdm0nvubi',
+                        http: {
+                            method: 'POST',
+                            path: '/',
+                            protocol: 'HTTP/1.1',
+                            sourceIp: '181.43.127.230',
+                            userAgent: 'PostmanRuntime/7.36.0'
+                        },
+                        requestId: '9c8c29ec-37aa-4d1e-bc32-fcd3abf82fdf',
+                        routeKey: '$default',
+                        stage: '$default',
+                        time: '12/Jan/2024:01:55:04 +0000',
+                        timeEpoch: 1705024504027
+                        },
+                        body: '{\r\n' +
+                        '    "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4",\r\n' +
+                        '    "message": "This is another test"\r\n' +
+                        '}',
+                        isBase64Encoded: false
+                        })
+})() 
 
 
 
