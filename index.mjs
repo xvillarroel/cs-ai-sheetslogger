@@ -67,7 +67,7 @@ const getCurrentDate = (yearonly) => {
 
 const writeToSheet = async (activeSheet, messageArray, index) => {
 
-    //console.log('Starting the Dump job');
+    console.log('Starting the Dump job');
 
     try {
 
@@ -96,7 +96,7 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
 export const handler = async (event, context) => {
 
-    console.log('*********** LOADING V1.2 ***********')
+    console.log('*********** LOADING V1.3 ***********')
     console.log(JSON.stringify(event,null,2));
     console.log(`Type: ${typeof event}`);
     console.log('*************************************')
@@ -178,7 +178,7 @@ export const handler = async (event, context) => {
         body: `Message written in row ${rowIndex}`
     }
     
-    //console.log(JSON.stringify(res, null, 2))
+    console.log(JSON.stringify(res, null, 2))
     return res;
 
 };
