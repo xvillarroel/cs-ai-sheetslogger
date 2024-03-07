@@ -112,25 +112,23 @@ export const handler = async (event, context) => {
     console.log('*************************************')
 
     let eventBody = JSON.parse(event.body);
-    ////console.log(`Type: ${typeof eventBody}`)
 
-    // UNIVERSAL VALIDATOR OF METHOD
-    if (event.requestContext.http.method !== 'POST') {
-        let res = {
-            statusCode: 400,
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8'
-            },
-            body: "Method is not allowed."
+        if (event.requestContext.http.method !== 'POST') {
+            let res = {
+                statusCode: 400,
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: "Method is not allowed."
+            }
+            console.log(JSON.stringify(res, null, 2))
+            return res;
         }
-        console.log(JSON.stringify(res, null, 2))
-        return res;
-    }
-    // UNIVERSAL VALIDATOR OF METHOD
 
-    let sheetid = eventBody.sheetid;
+    let response;
+    let tabName = (!eventBody.tab) ? getCurrentDate(true) : eventBody.tab; //get the the DD/MM/YYYY
 
-        if (!sheetid) {
+        if (!eventBody.sheetid) {
 
             response = await assembleResponse(400,{ message: '"sheetid" is missing from the Parameters.'}); //if it's not a GET 
             console.log(JSON.stringify(response),null,2);
@@ -138,10 +136,9 @@ export const handler = async (event, context) => {
 
         } 
 
-    let tabName = (!eventBody.tab) ? getCurrentDate(true) : eventBody.tab; //get the the DD/MM/YYYY
-    let message = eventBody.message;
+    let sheetid = eventBody.sheetid;
 
-        if (!message) {
+        if (!eventBody.message) {
 
             response = await assembleResponse(400,{ message: '"message" is missing from the Parameters.'}); //if it's not a GET 
             console.log(JSON.stringify(response),null,2);
@@ -149,15 +146,19 @@ export const handler = async (event, context) => {
 
         } 
 
-    let aiType = eventBody.type;
+    let message = eventBody.message;
 
-        if (!aiType) {
+        if (!eventBody.type) {
 
             response = await assembleResponse(400,{ message: '"aiType" is missing from the Parameters.'}); //if it's not a GET 
             console.log(JSON.stringify(response),null,2);
             return response;
 
         } 
+
+    let aiType = eventBody.type;
+
+
 
     let timeframe = getCurrentDate(false) // get the full timeframe, not only the DD/MM/YYYY
 
