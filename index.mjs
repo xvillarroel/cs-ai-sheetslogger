@@ -1,6 +1,7 @@
+//https://ytzivrzj76ejwc2vdbnzwladdm0nvubi.lambda-url.us-east-1.on.aws/
+
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
-import fetch from 'node-fetch';
 
 const globals = {
     SERVICEACCOUNTAUTH: new JWT({
@@ -10,6 +11,18 @@ const globals = {
     }),
     ROWOFFSET: 1,
 
+};
+
+const assembleResponse = async (status, message) => {
+
+    let object = {
+        statusCode: status,
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+        },
+        body: message
+    }
+    return object;
 };
 
 const createNewSheet = async (doc, tabName) => {
@@ -83,10 +96,10 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
 export const handler = async (event, context) => {
 
-    //console.log('*********** LOADING V1.2 ***********')
-    //console.log(event);
-    //console.log(`Type: ${typeof event}`);
-    //console.log('*************************************')
+    console.log('*********** LOADING V1.2 ***********')
+    console.log(JSON.stringify(event,null,2));
+    console.log(`Type: ${typeof event}`);
+    console.log('*************************************')
 
     let eventBody = JSON.parse(event.body);
     ////console.log(`Type: ${typeof eventBody}`)
@@ -100,33 +113,51 @@ export const handler = async (event, context) => {
             },
             body: "Method is not allowed."
         }
-        //console.log(JSON.stringify(res, null, 2))
+        console.log(JSON.stringify(res, null, 2))
         return res;
     }
     // UNIVERSAL VALIDATOR OF METHOD
 
     let sheetid = eventBody.sheetid;
+
+        if (!sheetid) {
+
+            response = await assembleResponse(400,{ message: '"sheetid" is missing from the Parameters.'}); //if it's not a GET 
+            console.log(JSON.stringify(response),null,2);
+            return response;
+
+        } 
+
     let tabName = (!eventBody.tab) ? getCurrentDate(true) : eventBody.tab; //get the the DD/MM/YYYY
     let message = eventBody.message;
+
+        if (!message) {
+
+            response = await assembleResponse(400,{ message: '"message" is missing from the Parameters.'}); //if it's not a GET 
+            console.log(JSON.stringify(response),null,2);
+            return response;
+
+        } 
+
     let timeframe = getCurrentDate(false) // get the full timeframe, not only the DD/MM/YYYY
 
     const doc = new GoogleSpreadsheet(sheetid, globals.SERVICEACCOUNTAUTH);
     await doc.loadInfo();
-    //console.log(`Title of the doc: ${doc.title}`);
+    console.log(`Title of the doc: ${doc.title}`);
 
     let activeSheet = doc.sheetsByTitle[tabName];
     let recentlyCreated = false;
 
     if (!activeSheet){
         await createNewSheet(doc, tabName);
-        //console.log('Sheet created')
+        console.log('Sheet created')
         recentlyCreated = true; //this means that the new sheet was recently created
         activeSheet = doc.sheetsByTitle[tabName];
     }
 
     // Get the next row to write
     let rowIndex;
-    if (recentlyCreated) { 
+    if (recentlyCreated) {
         rowIndex =2;
     } else {
         //await activeSheet.loadCells('B2:B');
@@ -193,7 +224,7 @@ export const handler = async (event, context) => {
 //                         timeEpoch: 1705024504027
 //                         },
 //                         body: '{\r\n' +
-//                         '    "sheetid": "1XNbbvjnF8GCiDgls0FI0K3GfmoinOcwfcd5nlIRpgD4",\r\n' +
+//                         '    "sheetid": "1Ld7Mfjf05_TGwldZP_ULT7tH050wMVZtvETNUHddT6s",\r\n' +
 //                         '    "message": "This is another test"\r\n' +
 //                         '}',
 //                         isBase64Encoded: false
@@ -204,7 +235,7 @@ export const handler = async (event, context) => {
 
 
 // {
-//     "sheetid": "",
+//     "sheetid": "1Ld7Mfjf05_TGwldZP_ULT7tH050wMVZtvETNUHddT6s",
 //     "tab": "01/11/2024",
 //     "message": "This is a test"
 // }
