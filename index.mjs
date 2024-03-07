@@ -29,11 +29,12 @@ const createNewSheet = async (doc, tabName) => {
 
     try {
         let activeSheet = await doc.addSheet({ title: tabName });
-        await activeSheet.loadCells('A1:C');
+        await activeSheet.loadCells('A1:D');
 
         const A2 = activeSheet.getCellByA1('A1');
         const B2 = activeSheet.getCellByA1('B1');
         const C2 = activeSheet.getCellByA1('C1');
+        const D2 = activeSheet.getCellByA1('D1');
 
         A2.value = 'Index';
         A2.textFormat = { bold: true }; 
@@ -41,8 +42,11 @@ const createNewSheet = async (doc, tabName) => {
         B2.value = 'Timeframe';
         B2.textFormat = { bold: true }; //B1.textFormat = { bold: true, foregroundColor: 'red' };
 
-        C2.value = 'Message'; 
+        C2.value = 'Message (GPT)'; 
         C2.textFormat = { bold: true };
+
+        D2.value = 'Message (CLAUDE)'; 
+        D2.textFormat = { bold: true };
 
         await activeSheet.saveUpdatedCells();
 
@@ -65,13 +69,13 @@ const getCurrentDate = (yearonly) => {
     return (yearonly) ? `${mm}/${dd}/${yyyy}` : `${mm}/${dd}/${yyyy} ${hours}:${minutes}:${seconds}`;
 };
 
-const writeToSheet = async (activeSheet, messageArray, index) => {
+const writeToSheet = async (activeSheet, messageArray, index, aiType) => {
 
-    console.log('Starting the Dump job');
+    console.log(`Starting the Dump job (${aiType})`);
 
     try {
 
-        await activeSheet.loadCells('A1:C');
+        await activeSheet.loadCells('A1:D');
                 
         let cell;
 
@@ -81,12 +85,18 @@ const writeToSheet = async (activeSheet, messageArray, index) => {
 
         cell = activeSheet.getCellByA1(`B${index}`); //B Column
             cell.value = messageArray[0];
-        
-        cell = activeSheet.getCellByA1(`C${index}`); //C Column
+
+        if (aiType === 'GPT') {
+            cell = activeSheet.getCellByA1(`C${index}`); //C Column
             cell.value = messageArray[1];
+        }
+        
+        if (aiType === 'CLAUDE') {
+            cell = activeSheet.getCellByA1(`D${index}`); //C Column
+            cell.value = messageArray[1];
+        }
 
         await activeSheet.saveUpdatedCells();
-        //console.log('Dump finished');
 
     } catch (error) {
         console.error(`ERROR: ${error.toString()}`);
@@ -139,6 +149,16 @@ export const handler = async (event, context) => {
 
         } 
 
+    let aiType = eventBody.type;
+
+        if (!aiType) {
+
+            response = await assembleResponse(400,{ message: '"aiType" is missing from the Parameters.'}); //if it's not a GET 
+            console.log(JSON.stringify(response),null,2);
+            return response;
+
+        } 
+
     let timeframe = getCurrentDate(false) // get the full timeframe, not only the DD/MM/YYYY
 
     const doc = new GoogleSpreadsheet(sheetid, globals.SERVICEACCOUNTAUTH);
@@ -168,7 +188,7 @@ export const handler = async (event, context) => {
     let messageArray = [timeframe, message]
 
     //Write the log to sheet
-    await writeToSheet(activeSheet, messageArray, rowIndex);
+    await writeToSheet(activeSheet, messageArray, rowIndex, aiType);
     
     let res = {
         statusCode: 200,
